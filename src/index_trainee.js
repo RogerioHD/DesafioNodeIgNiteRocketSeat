@@ -34,17 +34,17 @@ app.use(express.json());
 }];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
   //const {name, username}=request.body;
   const {username}=request.headers
+  // Complete aqui
   const user=users.find(u=>u.username==username);
   if(!user){
-    
+    //return response.status(400).json(`Usuario ${name} já Existe na base!!` )
     return response.status(400).json({
       error: 'Usuário não exsite na base'
     } )
   }else{
-    
+    // response.status(201).json({name, username})
     request.user=user
     return next();
   }
@@ -68,9 +68,11 @@ app.post('/users', (request, response) => {
 });
 
 app.get('/todos', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
   //const {username}=request.headers  
-  const {user}=request;
+  const {user}=request
+  // Complete aqui
+ 
+  //console.log(user)
   response.json(user.todos)
 });
 
@@ -96,11 +98,13 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   // Complete aqui
   const {id}=request.params;
   const {title, deadline}=request.body;
-  const {user}=request; ;
-  const todoIndex=user.todos.findIndex(t=>t.id==id);
-  if(todoIndex==-1){
+  const {user}=request;
+  const todo=user.todos.find(t=>t.id==id);
+
+  if(!todo){
     return response.status(404).json({error:"Não há tarefa"})
   }
+///////////////////////
 const updatedTodo={
   title, 
   deadline
@@ -110,8 +114,18 @@ const updatedTodo={
       todo={...todo, ...updatedTodo}
     }
     return todo
-  });
+  })
+  //console.log(newTodoList)
   user.todos=[...newTodoList];
+  //////////////////
+  /* 
+  todo.title=title;
+  todo.deadline=deadline; 
+  */
+  //////////////
+  //response.status(201).json({message:"Todo Updated Successfully!!"});
+  const todoIndex=user.todos.findIndex(t=>t.id==id)
+  //console.log(user.todos[todoIndex])
   response.status(201).json(user.todos[todoIndex])
 });
 
@@ -130,13 +144,22 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
   // Complete aqui
   const {user}=request;
-  const {id}=request.params; 
+  const {id}=request.params;
+  ///////////////////////
   const todo = user.todos.find(t=>t.id==id);
   if(!todo){
     return response.status(404).json({error:"Não há tarefa"})
   }
   const newTodoList=user.todos.filter(t=>t.id!=id);
   user.todos=[...newTodoList];
+  /////////////
+  /* const todoIndex=user.todos.findIndex(t=>t.id===id);
+  if(todoIndex==-1){
+    return response.status(404).json({error:"Não há tarefa"})
+  }
+  user.todos.splice(todoIndex,1); */
+///////////////
+
   return response.status(204).json()
 });
 
